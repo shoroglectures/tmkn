@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   Activity, LayoutDashboard, BookOpen, Users, ClipboardList,
-  HeartPulse, Settings, LogOut, GraduationCap,
+  HeartPulse, Settings, LogOut, GraduationCap, ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -18,6 +18,9 @@ const links = [
 export default function Sidebar() {
   const { profile, user, signOut } = useAuth();
   const name = profile?.full_name || user?.email || 'مستخدم';
+  const visibleLinks = profile?.role === 'admin'
+    ? [...links, { to: '/admin', label: 'إدارة الحسابات', icon: ShieldCheck }]
+    : links;
 
   return (
     <aside className="w-64 fixed right-0 top-0 bottom-0 bg-gradient-to-b from-brand-700 to-brand-900 text-white flex flex-col z-30">
@@ -32,7 +35,7 @@ export default function Sidebar() {
 
       {/* روابط */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {links.map(({ to, label, icon: Icon, end }) => (
+        {visibleLinks.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}

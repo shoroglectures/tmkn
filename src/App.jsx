@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import StartupSplash from './components/StartupSplash';
@@ -18,6 +18,8 @@ const PlanDetail = lazy(() => import('./pages/PlanDetail'));
 const CoursePlan = lazy(() => import('./pages/CoursePlan'));
 const StudentPortal = lazy(() => import('./pages/StudentPortal'));
 const Settings = lazy(() => import('./pages/Settings'));
+const Admin = lazy(() => import('./pages/Admin'));
+const AccessPending = lazy(() => import('./pages/AccessPending'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function RouteView({ page: Page }) {
@@ -29,7 +31,7 @@ function RouteView({ page: Page }) {
 }
 
 export default function App() {
-  const { loading: authLoading } = useAuth();
+  const { loading: authLoading, profile } = useAuth();
   const [splashElapsed, setSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function App() {
     <Routes>
       {/* عام */}
       <Route path="/login" element={<RouteView page={Login} />} />
+      <Route path="/access-pending" element={<RouteView page={AccessPending} />} />
       <Route path="/student/:token" element={<RouteView page={StudentPortal} />} />
       <Route path="/plan/:token" element={<RouteView page={StudentPortal} />} />
 
@@ -66,6 +69,10 @@ export default function App() {
         <Route path="/plans/:id" element={<RouteView page={PlanDetail} />} />
         <Route path="/course/:id/plan" element={<RouteView page={CoursePlan} />} />
         <Route path="/settings" element={<RouteView page={Settings} />} />
+        <Route
+          path="/admin"
+          element={profile?.role === 'admin' ? <RouteView page={Admin} /> : <Navigate to="/" replace />}
+        />
         <Route path="*" element={<RouteView page={NotFound} />} />
       </Route>
     </Routes>

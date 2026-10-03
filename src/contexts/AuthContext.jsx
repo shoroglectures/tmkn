@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [profileError, setProfileError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // تحميل الجلسة الأولى + الاستماع للتغييرات
@@ -43,8 +44,15 @@ export function AuthProvider({ children }) {
       .eq('id', userId)
       .maybeSingle();
 
-    if (!error) setProfile(data);
+    if (error) {
+      setProfile(null);
+      setProfileError(error);
+    } else {
+      setProfile(data);
+      setProfileError(null);
+    }
     setLoading(false);
+    return { data, error };
   }
 
   const signIn = async (email, password) => {
@@ -68,7 +76,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signIn, signUp, signOut }}
+      value={{ user, profile, profileError, loading, signIn, signUp, signOut, refreshProfile: loadProfile }}
     >
       {children}
     </AuthContext.Provider>

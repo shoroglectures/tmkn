@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, profile, profileError, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -18,6 +18,21 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen grid place-items-center p-6">
+        <div className="card max-w-lg p-6 text-center">
+          <p className="font-bold text-red-700">تعذر التحقق من صلاحية الحساب.</p>
+          <p className="mt-2 text-sm text-slate-600">{profileError.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile || profile.access_status !== 'approved') {
+    return <Navigate to="/access-pending" replace />;
   }
 
   return children;

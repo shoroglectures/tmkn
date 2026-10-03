@@ -13,14 +13,17 @@ const features = [
 ];
 
 export default function Login() {
-  const { user, signIn, signUp } = useAuth();
+  const { user, profile, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState('login'); // login | signup
   const [busy, setBusy] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    return <Navigate to={profile?.access_status === 'approved' ? '/' : '/access-pending'} replace />;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -33,9 +36,10 @@ export default function Login() {
       } else {
         if (!form.name.trim()) throw new Error('أدخلي الاسم');
         await signUp(form.email, form.password, form.name.trim());
-        toast.success('تم إنشاء الحساب بنجاح');
+        setRequestSubmitted(true);
+        toast.success('تم إرسال طلب تفعيل الحساب');
       }
-      navigate('/');
+      if (mode === 'login') navigate('/');
     } catch (err) {
       const msg = err?.message || 'حدث خطأ';
       if (msg.includes('Invalid login')) toast.error('البريد أو كلمة المرور غير صحيحة');
@@ -82,7 +86,10 @@ export default function Login() {
 
           <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
             <button
-              onClick={() => setMode('login')}
+              onClick={() => {
+                setMode('login');
+                setRequestSubmitted(false);
+              }}
               className={`flex-1 py-2 rounded-lg text-sm font-bold transition ${
                 mode === 'login' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
               }`}
@@ -90,15 +97,38 @@ export default function Login() {
               تسجيل الدخول
             </button>
             <button
-              onClick={() => setMode('signup')}
+              onClick={() => {
+                setMode('signup');
+                setRequestSubmitted(false);
+              }}
               className={`flex-1 py-2 rounded-lg text-sm font-bold transition ${
                 mode === 'signup' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'
               }`}
             >
-              حساب جديد
+              طلب تفعيل حساب
             </button>
           </div>
 
+          {requestSubmitted ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+              <h2 className="font-bold text-emerald-800">وصل طلبك بنجاح</h2>
+              <p className="mt-2 text-sm leading-6 text-emerald-700">
+                لن تتمكني من دخول النظام حتى تراجعي الطلب وتتم الموافقة عليه من الإدارة.
+                بعد الموافقة، سجّلي الدخول بالبريد وكلمة المرور اللذين أدخلتهما.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setRequestSubmitted(false);
+                  setMode('login');
+                  setForm({ name: '', email: '', password: '' });
+                }}
+                className="btn-ghost mt-4"
+              >
+                العودة لتسجيل الدخول
+              </button>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div>
@@ -147,9 +177,17 @@ export default function Login() {
             </div>
 
             <button type="submit" className="btn-primary w-full" disabled={busy}>
-              {busy ? 'جاري...' : mode === 'login' ? 'دخول' : 'إنشاء الحساب'}
+              {busy ? 'جاري...' : mode === 'login' ? 'دخول' : 'إرسال طلب التفعيل'}
             </button>
+            {mode === 'signup' && (
+              <p className="text-xs text-slate-500 text-center leading-5">
+                سيُنشأ الحساب بحالة معلّقة. لا تُخزّن كلمة المرور في طلب التسجيل؛
+                تحفظها خدمة المصادقة لدى Supabase، ولن يفتح الحساب قبل موافقة الإدارة.
+                إذا وصلك رابط تأكيد للبريد، أكّديه قبل تسجيل الدخول.
+              </p>
+            )}
           </form>
+          )}
 
           <p className="text-xs text-slate-400 text-center mt-6">
             © {new Date().getFullYear()} تمكن بلس — جميع الحقوق محفوظة

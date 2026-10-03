@@ -78,11 +78,31 @@ export default function Courses() {
   }
 
   async function deleteCourse(id) {
-    if (!confirm('سيتم حذف المقرر وكل شعبه ومتدرباته. متأكدة؟')) return;
-    const { error } = await supabase.from('courses').delete().eq('id', id);
+    if (!confirm('سيتم حذف المقرر وكل شعبه ومتدرباته ودرجاتهن واختباراتهن وخطط الدعم نهائيًا. متأكدة؟')) return;
+    const { data, error } = await supabase
+      .from('courses')
+      .delete()
+      .eq('id', id)
+      .select('id')
+      .maybeSingle();
     if (error) return toast.error(error.message);
+    if (!data) return toast.error('لم يتم حذف المقرر؛ ربما حُذف مسبقًا أو لا تملكين صلاحية حذفه');
     toast.success('تم الحذف');
-    load();
+    await load();
+  }
+
+  async function deleteSection(section) {
+    if (!confirm(`سيتم حذف الشعبة «${section.name}» مع متدرباتها ودرجاتهن واختباراتهن وخطط الدعم نهائيًا. متأكدة؟`)) return;
+    const { data, error } = await supabase
+      .from('sections')
+      .delete()
+      .eq('id', section.id)
+      .select('id')
+      .maybeSingle();
+    if (error) return toast.error(error.message);
+    if (!data) return toast.error('لم يتم حذف الشعبة؛ ربما حُذفت مسبقًا أو لا تملكين صلاحية حذفها');
+    toast.success('تم حذف الشعبة وبياناتها المرتبطة');
+    await load();
   }
 
   if (loading) return <div className="card p-10 text-center text-slate-400">جاري التحميل...</div>;
@@ -139,16 +159,26 @@ export default function Courses() {
 
                 <div className="space-y-1.5 mb-3 flex-1">
                   {courseSecs.map((s) => (
-                    <Link
-                      key={s.id}
-                      to={'/section/' + s.id}
-                      className="flex justify-between items-center bg-slate-50 hover:bg-brand-50 px-3 py-2 rounded-lg text-sm transition"
-                    >
-                      <span className="font-semibold truncate">{s.name}</span>
-                      <span className="text-slate-500 text-xs flex items-center gap-1">
-                        <UsersIcon size={13} /> {studentsCount[s.id] || 0}
-                      </span>
-                    </Link>
+                    <div key={s.id} className="flex items-center gap-1">
+                      <Link
+                        to={'/section/' + s.id}
+                        className="flex min-w-0 flex-1 justify-between items-center bg-slate-50 hover:bg-brand-50 px-3 py-2 rounded-lg text-sm transition"
+                      >
+                        <span className="font-semibold truncate">{s.name}</span>
+                        <span className="text-slate-500 text-xs flex items-center gap-1">
+                          <UsersIcon size={13} /> {studentsCount[s.id] || 0}
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => deleteSection(s)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                        aria-label={`حذف الشعبة ${s.name}`}
+                        title="حذف الشعبة وبياناتها المرتبطة"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   ))}
                   {courseSecs.length === 0 && (
                     <div className="text-xs text-slate-400 text-center py-3">
