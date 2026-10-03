@@ -5,7 +5,7 @@ export default function StartupSplash() {
         <div className="startup-emblem">
           <span className="startup-ring startup-ring-outer" aria-hidden="true" />
           <span className="startup-ring startup-ring-inner" aria-hidden="true" />
-          <img src="/logo.svg" alt="" className="startup-logo" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="startup-logo" />
         </div>
         <h1>تمكن بلس</h1>
         <p>مسار التمكّن التدريبي</p>

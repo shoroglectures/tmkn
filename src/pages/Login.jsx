@@ -56,7 +56,7 @@ export default function Login() {
         <div className="absolute -bottom-24 -right-20 w-96 h-96 rounded-full bg-gold-500/10 blur-3xl" />
 
         <div className="relative z-10">
-          <img src="/logo.svg" alt="" className="w-20 h-20 mb-6" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="w-20 h-20 mb-6" />
           <h1 className="text-4xl font-black mb-3">تمكن بلس</h1>
           <p className="text-brand-100 text-lg leading-relaxed mb-8 max-w-md">
             مسار التمكّن التدريبي — حوّلي درجات المتدربات إلى خطط دعم عملية قابلة للمتابعة.
@@ -76,7 +76,7 @@ export default function Login() {
       <div className="flex items-center justify-center p-6">
         <div className="card p-8 w-full max-w-md">
           <div className="lg:hidden text-center mb-6">
-            <img src="/logo.svg" alt="" className="w-16 h-16 mx-auto mb-2" />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="w-16 h-16 mx-auto mb-2" />
             <div className="font-black text-xl">تمكن بلس</div>
           </div>
 

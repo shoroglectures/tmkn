@@ -23,7 +23,7 @@ export default function Sidebar() {
     <aside className="w-64 fixed right-0 top-0 bottom-0 bg-gradient-to-b from-brand-700 to-brand-900 text-white flex flex-col z-30">
       {/* الشعار */}
       <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
-        <img src="/logo.svg" alt="" className="h-12 w-12 shrink-0" />
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-12 w-12 shrink-0" />
         <div className="leading-tight">
           <div className="font-black text-lg">تمكن بلس</div>
           <div className="text-[11px] text-brand-100/80">مسار التمكّن التدريبي</div>
