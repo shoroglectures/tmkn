@@ -1,0 +1,41 @@
+name: Keep Supabase Active
+
+on:
+  schedule:
+    - cron: '17 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Call the database keepalive function
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_ANON_KEY" ]]; then
+            echo "::error::Add the VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY repository secrets."
+            exit 1
+          fi
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --max-time 30 \
+            --retry 2 \
+            --retry-delay 5 \
+            --retry-all-errors \
+            --request POST \
+            "${SUPABASE_URL%/}/rest/v1/rpc/keepalive" \
+            --header "apikey: $SUPABASE_ANON_KEY" \
+            --header "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{}'
