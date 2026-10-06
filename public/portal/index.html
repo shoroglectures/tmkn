@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https://jvvafalehkpgaycsyuhk.supabase.co; base-uri 'none'; form-action 'none'">
+  <meta name="theme-color" content="#f3faf6">
+  <title>نموذج الدعم — تمكن بلس</title>
+  <style>
+    :root{font-family:Tahoma,Arial,sans-serif;color:#183c30;background:#f3faf6;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;min-width:320px}.shell{width:min(760px,calc(100% - 28px));margin:28px auto 56px}
+    .card{background:#fff;border:1px solid #e0eee6;border-radius:18px;box-shadow:0 5px 22px #123b2810}
+    .hero{padding:24px;margin-bottom:16px}.hero>span{color:#008f61;font-size:13px;font-weight:700}
+    h1{margin:8px 0;font-size:24px}.hero p,.status p{color:#5a7268;line-height:1.8}
+    .form,.report{padding:22px}.question{margin:0 0 18px;padding:0;border:0}
+    .question legend{margin-bottom:9px;font-weight:700;line-height:1.7}
+    .option{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;margin:7px 0;border:1px solid #e6eee9;border-radius:12px;cursor:pointer}
+    .option:has(input:checked){border-color:#008f61;background:#f1faf5}
+    input[type=checkbox]{width:18px;height:18px;flex:0 0 18px;margin:2px 0 0;accent-color:#008f61}
+    .footer-message{white-space:pre-wrap;margin:18px 0;padding:14px;border:1px solid #d7eee1;border-radius:12px;background:#f3faf6;line-height:1.8}
+    .consent{display:flex;gap:9px;align-items:flex-start;margin:22px 0 16px;font-size:13px;line-height:1.7}
+    .error{color:#a32929;font-size:13px}.button{display:inline-flex;justify-content:center;border:0;border-radius:11px;padding:12px 18px;color:#fff;background:#006747;font:inherit;font-weight:700;cursor:pointer}
+    .button:disabled{opacity:.6;cursor:wait}.status{min-height:180px;display:grid;align-content:center;justify-items:center;padding:28px;text-align:center}
+    .status h1{font-size:20px}.response{padding:14px 0;border-bottom:1px solid #e7eee9;line-height:1.8}
+    .response:last-of-type{border-bottom:0}.response h2{font-size:16px}.response p{white-space:pre-wrap}
+    .response a{color:#006747;font-weight:700}.choice,.privacy-note{color:#62776d;font-size:13px}
+    .privacy-note{margin-top:22px;border-top:1px solid #e7eee9;padding-top:12px}.print-title{display:none}
+    @media print{@page{size:A4;margin:15mm}body{background:#fff}.shell{width:100%;margin:0}.card{border:0;box-shadow:none;padding:0}
+      .no-print{display:none!important}.print-title{display:block;margin:0 0 18px}.response{break-inside:avoid}a{color:#006747}}
+  </style>
+</head>
+<body>
+  <main id="app" class="shell" aria-live="polite">
+    <section class="card status"><h1>جارٍ تحميل النموذج...</h1></section>
+  </main>
+  <script>
+    const app = document.querySelector("#app");
+    const apiBase = "https://jvvafalehkpgaycsyuhk.supabase.co/functions/v1/anonymous-portal";
+    const anonKey = "sb_publishable_OpbnlUGo-BdKKQWDj8X65g_SC9ZfaWB";
+    const token = new URLSearchParams(location.search).get("token") || "";
+    const tokenPattern = /^[a-f0-9]{64}$/i;
+    let formPayload;
+    let submittedResult;
+    let submitting = false;
+    let formError = "";
+    const selections = new Map();
+
+    async function request(path, body) {
+      const response = await fetch(apiBase + "/" + path, {
+        method: "POST",
+        headers: { apikey: anonKey, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "تعذر الاتصال بالبوابة");
+      return result;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      })[character]);
+    }
+
+    function renderStatus(title, message) {
+      app.innerHTML = '<section class="card status"><h1>' + escapeHtml(title) + "</h1><p>"
+        + escapeHtml(message) + "</p></section>";
+    }
+
+    function renderForm() {
+      const questions = formPayload.questions.map((question) => (
+        '<fieldset class="question"><legend>' + escapeHtml(question.text) + "</legend>"
+        + question.options.map((option) => (
+          '<label class="option"><input type="checkbox" data-question="'
+          + escapeHtml(question.id) + '" value="' + escapeHtml(option.id) + '"'
+          + (selections.get(question.id)?.has(option.id) ? " checked" : "") + "><span>"
+          + escapeHtml(option.text) + "</span></label>"
+        )).join("") + "</fieldset>"
+      )).join("");
+      app.innerHTML = '<header class="card hero"><span>تمكن بلس</span><h1>نموذج خطة الدعم التدريبية</h1>'
+        + "<p>لا يطلب هذا النموذج الاسم أو الرقم التدريبي. ستظهر الإرشادات بعد الإرسال.</p></header>"
+        + '<form class="card form" id="support-form">'
+        + (formError ? '<p class="error" role="alert">' + escapeHtml(formError) + "</p>" : "")
+        + questions
+        + (formPayload.footer_message
+          ? '<div class="footer-message">' + escapeHtml(formPayload.footer_message) + "</div>" : "")
+        + '<label class="consent"><input type="checkbox" name="consent" required>'
+        + "<span>أقرّ بأن الإجابات تعبّر عن اختياراتي، وأوافق على تقديمها.</span></label>"
+        + '<button class="button" type="submit"' + (submitting ? " disabled" : "") + ">"
+        + (submitting ? "جارٍ الإرسال..." : "تقديم وإظهار الإرشادات") + "</button></form>";
+      app.querySelectorAll("input[data-question]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const selected = selections.get(input.dataset.question) || new Set();
+          if (input.checked) selected.add(input.value);
+          else selected.delete(input.value);
+          selections.set(input.dataset.question, selected);
+        });
+      });
+      app.querySelector("#support-form").addEventListener("submit", submitForm);
+    }
+
+    function renderResult() {
+      const advice = submittedResult.responses.map((item) => (
+        '<article class="response"><h2>' + escapeHtml(item.question) + "</h2><p class=\"choice\">اختيارك: "
+        + escapeHtml(item.option) + "</p>"
+        + (item.response ? "<p>" + escapeHtml(item.response) + "</p>" : "")
+        + (item.url ? '<a href="' + escapeHtml(item.url)
+          + '" target="_blank" rel="noopener noreferrer">فتح رابط المساندة</a>' : "")
+        + "</article>"
+      )).join("");
+      app.innerHTML = '<header class="card hero no-print"><span>تمكن بلس</span><h1>خطة الدعم التدريبية</h1>'
+        + "<p>تم استلام إجاباتك. حمّلي نسخة من الإرشادات للرجوع إليها.</p>"
+        + '<button class="button" type="button" id="download">تحميل / طباعة PDF</button></header>'
+        + '<section class="card report"><h1 class="print-title">خطة الدعم التدريبية</h1>'
+        + (submittedResult.footer_message
+          ? '<div class="footer-message">' + escapeHtml(submittedResult.footer_message) + "</div>" : "")
+        + (advice || "<p>شكراً لإكمال النموذج.</p>")
+        + '<p class="privacy-note">هذا التقرير لا يحتوي على الاسم أو الرقم التدريبي.</p></section>';
+      app.querySelector("#download").addEventListener("click", () => window.print());
+    }
+
+    async function submitForm(event) {
+      event.preventDefault();
+      if (submitting) return;
+      submitting = true;
+      formError = "";
+      renderForm();
+      const answers = formPayload.questions.map((question) => ({
+        question_id: question.id,
+        selected: [...(selections.get(question.id) || [])],
+      }));
+      try {
+        const result = await request("submit", { token, answers });
+        submittedResult = result.result;
+        renderResult();
+      } catch (error) {
+        submitting = false;
+        formError = error.message;
+        renderForm();
+      }
+    }
+
+    async function start() {
+      if (!tokenPattern.test(token)) {
+        renderStatus("الرابط غير صالح", "تحققي من الرابط أو اطلبي من المدربة إرساله مجدداً.");
+        return;
+      }
+      try {
+        const result = await request("open", { token });
+        if (result.submitted) {
+          submittedResult = result.result;
+          renderResult();
+          return;
+        }
+        formPayload = result.payload;
+        renderForm();
+      } catch (error) {
+        renderStatus("الرابط غير صالح أو منتهي", error.message);
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>
