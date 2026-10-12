@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="تمكن بلس: برنامج Windows محلي لمساندة المدربات في تنظيم المقررات وخطط الدعم.">
+  <meta name="theme-color" content="#006747">
+  <title>تمكن بلس | برنامج محلي للمدربات</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      color: #173a30;
+      background: #f1f5f8;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; }
+    .topbar {
+      display: flex;
+      min-height: 56px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 5vw, 72px);
+      background: #fff;
+      color: #60756e;
+      font-size: 13px;
+    }
+    .topbar-brand { display: inline-flex; align-items: center; gap: 9px; color: #006747; font-weight: 800; }
+    .topbar img { width: 28px; height: 28px; }
+    main {
+      display: grid;
+      min-height: calc(100vh - 56px);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(38px, 8vw, 112px);
+      background: radial-gradient(circle at 15% 90%, #145a42 0, transparent 32%), linear-gradient(145deg, #007451, #004b38 82%);
+      color: #fff;
+    }
+    .hero img { width: 78px; height: 78px; margin-bottom: 22px; }
+    .eyebrow { color: #b8ead1; font-size: 14px; font-weight: 700; }
+    h1 { margin: 10px 0; font-size: clamp(34px, 4.5vw, 54px); line-height: 1.2; }
+    .hero-copy { max-width: 530px; margin: 0; color: #d9f2e7; font-size: 17px; line-height: 1.9; }
+    .features { display: grid; gap: 13px; margin: 30px 0 0; padding: 0; list-style: none; }
+    .features li { display: flex; align-items: center; gap: 11px; color: #f1fff7; font-size: 14px; }
+    .check {
+      display: inline-grid;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      place-items: center;
+      border: 1px solid #8bd7ae;
+      border-radius: 50%;
+      color: #ffc34d;
+      font-weight: 800;
+    }
+    .action-area { display: grid; place-items: center; padding: 36px 24px; }
+    .action-card {
+      width: min(100%, 440px);
+      border: 1px solid #e5ecf0;
+      border-radius: 22px;
+      padding: clamp(25px, 4vw, 42px);
+      background: #fff;
+      box-shadow: 0 18px 55px rgb(28 60 49 / 8%);
+    }
+    .action-card h2 { margin: 0 0 8px; color: #173a30; font-size: 23px; }
+    .action-intro { margin: 0 0 22px; color: #718078; font-size: 14px; line-height: 1.8; }
+    .download {
+      display: flex;
+      min-height: 70px;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-radius: 13px;
+      padding: 13px 17px;
+      background: #008f61;
+      color: #fff;
+      text-align: right;
+      text-decoration: none;
+      transition: background .15s ease, transform .15s ease;
+    }
+    .download:hover { background: #006f4b; transform: translateY(-1px); }
+    .download:focus-visible, .guide-link:focus-visible { outline: 3px solid #f2b544; outline-offset: 3px; }
+    .download svg { width: 25px; height: 25px; flex: 0 0 25px; }
+    .download strong { display: block; font-size: 15px; }
+    .download small { display: block; margin-top: 3px; color: #d6f5e6; font-size: 12px; }
+    .guide-link {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-top: 14px;
+      border: 1px solid #e1ebe6;
+      border-radius: 13px;
+      padding: 14px 16px;
+      color: #086b4b;
+      text-decoration: none;
+      transition: background .15s ease;
+    }
+    .guide-link:hover { background: #f4faf6; }
+    .guide-link svg { width: 23px; height: 23px; flex: 0 0 23px; }
+    .guide-link strong { display: block; font-size: 14px; }
+    .guide-link small { display: block; margin-top: 3px; color: #78877f; font-size: 12px; }
+    .privacy-note {
+      margin: 20px 0 0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f2f8f4;
+      color: #526d60;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .privacy-note strong { color: #087653; }
+    .release-note { margin: 13px 0 0; color: #89958f; font-size: 11px; text-align: center; }
+    @media (max-width: 760px) {
+      .topbar { min-height: 50px; }
+      main { grid-template-columns: 1fr; }
+      .hero { min-height: 390px; padding: 44px 28px; }
+      .hero img { width: 62px; height: 62px; margin-bottom: 15px; }
+      .features { gap: 10px; margin-top: 20px; }
+      .action-area { padding: 24px 18px 36px; }
+      .action-card { padding: 25px 21px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand"><img src="./logo.svg" alt=""><span>تمكن بلس</span></div>
+    <span>برنامج محلي للمدربات</span>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="site-title">
+      <img src="./logo.svg" alt="شعار تمكن بلس">
+      <div class="eyebrow">مسار التمكّن التدريبي</div>
+      <h1 id="site-title">تمكن بلس</h1>
+      <p class="hero-copy">برنامج سطح مكتب يساند المدربات في تنظيم المقررات والشعب، ومراجعة الدرجات، وإعداد خطط الدعم والتقارير.</p>
+      <ul class="features">
+        <li><span class="check" aria-hidden="true">✓</span> تنظيم محلي للمقررات والشعب وبيانات المتدربات</li>
+        <li><span class="check" aria-hidden="true">✓</span> تحليل درجات ومؤشرات واضحة لدعم القرار التدريبي</li>
+        <li><span class="check" aria-hidden="true">✓</span> إعداد خطط الدعم ومراجعتها وتصديرها بصيغة PDF</li>
+      </ul>
+    </section>
+    <section class="action-area" aria-labelledby="download-title">
+      <div class="action-card">
+        <h2 id="download-title">ابدئي باستخدام تمكن بلس</h2>
+        <p class="action-intro">حمّلي نسخة Windows ودليل الاستخدام. لا يوجد تسجيل دخول أو طلب تفعيل حساب عبر هذا الموقع.</p>
+        <a class="download" href="https://github.com/shoroglectures/tmkn/releases/download/v0.1.2/TamkunPlus-Setup-0.1.2-x64.exe">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span><strong>تحميل البرنامج</strong><small>Windows · الإصدار 0.1.2</small></span>
+        </a>
+        <a class="guide-link" href="./guide.pdf" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 3.75h8l4 4v12.5H6V3.75Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M14 4v4h4M9 12h6m-6 3h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span><strong>دليل المستخدم - تمكن بلس للمدربات</strong><small>فتح الدليل بصيغة PDF في المتصفح</small></span>
+        </a>
+        <p class="privacy-note"><strong>الخصوصية:</strong> تُحفظ بيانات العمل في التطبيق على جهاز المدربة. هذا الموقع مخصص لتنزيل البرنامج والدليل ولا يستقبل بيانات المتدربات.</p>
+        <p class="release-note">قبل التثبيت، راجعي دليل الاستخدام واتبعي إجراءات حماية البيانات المعتمدة لدى جهتك.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
